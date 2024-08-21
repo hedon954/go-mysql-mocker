@@ -1,0 +1,10 @@
+.idea
+.vscode/**
+main
+**coverage.out*
+*groups-*.json
+.DS_Store
+
+# binary files
+
+# config file

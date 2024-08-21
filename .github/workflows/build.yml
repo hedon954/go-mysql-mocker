@@ -1,0 +1,106 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-go:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+        go-version: ['1.22']
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.59
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            /go/pkg/mod
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
+      - name: Display Go version
+        run: go version
+      - name: Install dependencies
+        run: go get ./...
+      - name: Check code format
+        run: gofmt -l .
+      - name: Check the package for errors
+        run: go build ./...
+      - name: Run tests with coverage and race detector
+        run: |
+          go test -v -race -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          files: coverage.out
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          continue_on_error: true
+          verbose: true
+      # - name: Check test coverage
+      #   run: bash ./scripts/ci/check_test_coverage.sh
+      - name: Get tags info
+        id: get_tag_message
+        run: git fetch origin +refs/tags/*:refs/tags/*
+        if: startsWith(github.ref, 'refs/tags/')
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v3
+        id: git-cliff
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip header
+        env:
+          OUTPUT: NEW_CHANGELOG.md
+      - name: Prepend tag message and new changelog to existing CHANGELOG.md
+        run: |
+          cat NEW_CHANGELOG.md
+          git fetch origin main:main
+          git checkout main
+          if [ -f "CHANGELOG.md" ]; then
+            head -n 1 CHANGELOG.md > TEMP_CHANGELOG.md
+            echo "" >> TEMP_CHANGELOG.md
+            cat NEW_CHANGELOG.md >> TEMP_CHANGELOG.md
+            tail -n +2 CHANGELOG.md >> TEMP_CHANGELOG.md
+            mv TEMP_CHANGELOG.md CHANGELOG.md
+          else
+            mv NEW_CHANGELOG.md CHANGELOG.md
+          fi
+          rm -f NEW_CHANGELOG.md
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add CHANGELOG.md
+          git commit -m "[skip] Update CHANGELOG.md with new changes"
+          git push origin main --force
+        if: startsWith(github.ref, 'refs/tags/') && steps.git-cliff.outputs.content != ''
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body: ${{ steps.git-cliff.outputs.content }}

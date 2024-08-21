@@ -1,0 +1,113 @@
+linters-settings:
+  dupl:
+    threshold: 100
+  funlen:
+    lines: 100
+    statements: 50
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport # https://github.com/go-critic/go-critic/issues/845
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+      - exposedSyncMutex
+  gocyclo:
+    # Minimal code complexity to report.
+    # Default: 30 (but we recommend 10-20)
+    min-complexity: 15
+  goimports:
+    local-prefixes: github.com/golangci/golangci-lint
+  lll:
+    line-length: 140
+  misspell:
+    locale: US
+  mnd:
+    checks: # "argument", "case", "condition", "operation", "return", "assign"
+      - case
+      - return
+      - assign
+      - condition
+      - operation
+  stylecheck:
+    checks:
+      - ST1000
+      - ST1001
+      - ST1002
+      # 不要启用 ST1003
+      - ST1004
+      - ST1005
+      - ST1006
+      - ST1008
+      - ST1010
+      - ST1011
+      - ST1012
+      - ST1013
+      - ST1015
+      - ST1016
+      - ST1017
+      - ST1018
+
+linters:
+  # please, do not use `enable-all`: it's deprecated and will be removed soon.
+  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
+  disable-all: true
+  enable:
+    - bodyclose
+#    - depguard # what is the usage of it?
+    - dogsled
+    - dupl
+    - errcheck
+    - funlen
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - mnd
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - rowserrcheck
+    - exportloopref
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+  # don't enable:
+  # - gochecknoglobals
+  # - gocognit
+  # - godox
+  # - maligned
+  # - prealloc
+
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - funlen
+  exclude-dirs:
+    - vendor
+  new: true
+  new-from-rev: "HEAD~1"
+  whole-files: false
