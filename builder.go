@@ -1,0 +1,252 @@
+package gmm
+
+import (
+	"database/sql"
+	"errors"
+	"fmt"
+	"log/slog"
+	"os"
+	"reflect"
+	"strconv"
+	"sync/atomic"
+
+	"github.com/dolthub/go-mysql-server/server"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
+)
+
+var port atomic.Int32
+
+func init() {
+	port.Store(19527)
+}
+
+type GMMBuilder struct {
+	dbName string
+	port   int
+	server *server.Server
+	sqlDB  *sql.DB
+	gormDB *gorm.DB
+	err    error
+
+	tables   []schema.Tabler
+	models   []schema.Tabler
+	sqlStmts []string
+	sqlFiles []string
+}
+
+func Builder(db ...string) *GMMBuilder {
+	b := &GMMBuilder{
+		port:     int(port.Add(1)),
+		tables:   make([]schema.Tabler, 0),
+		models:   make([]schema.Tabler, 0),
+		sqlStmts: make([]string, 0),
+		sqlFiles: make([]string, 0),
+	}
+	dbName := "gmm-test-db-" + uuid.NewString()[:6]
+	if len(db) > 0 {
+		dbName = db[0]
+	}
+	b.dbName = dbName
+	return b
+}
+
+func (b *GMMBuilder) Port(port int) *GMMBuilder {
+	if b.err != nil {
+		return b
+	}
+	b.port = port
+	return b
+}
+
+func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err error) {
+	b.initServer()
+	if b.err != nil {
+		return nil, nil, nil, b.err
+	}
+
+	// start server
+	slog.Info("start go mysql mocker server, listening at 0.0.0.0:" + strconv.Itoa(b.port))
+	go func() {
+		if err := b.server.Start(); err != nil {
+			panic(err)
+		}
+	}()
+
+	shutdown = func() {
+		_ = b.server.Close()
+	}
+
+	// create client and connect to server
+	b.sqlDB, b.gormDB, err = createMySQLClient(b.port, b.dbName)
+	if err != nil {
+		b.err = fmt.Errorf("failed to create sql client: %w", err)
+		return nil, nil, nil, b.err
+	}
+
+	// prepare init data
+	b.initTables()
+	b.initWithModels()
+	b.initWithStmts()
+	b.initWithFiles()
+	if b.err != nil {
+		return nil, nil, nil, b.err
+	}
+
+	return b.sqlDB, b.gormDB, shutdown, nil
+}
+
+func (b *GMMBuilder) initServer() *GMMBuilder {
+	if b.err != nil {
+		return b
+	}
+	b.server, b.err = createMySQLServer(b.dbName, b.port)
+	return b
+}
+
+func (b *GMMBuilder) CreateTable(table schema.Tabler) *GMMBuilder {
+	if b.err != nil {
+		return b
+	}
+	b.tables = append(b.tables, table)
+	return b
+}
+
+// InitData adds init data, if data is a struct/pointer, should implement schema.Tabler.
+// if data is a slice, each item should implement schema.Tabler, otherwise will return error.
+func (b *GMMBuilder) InitData(data interface{}) *GMMBuilder {
+	if b.err != nil {
+		return b
+	}
+
+	if reflect.TypeOf(data).Kind() == reflect.Slice {
+		slice := reflect.ValueOf(data)
+		for i := 0; i < slice.Len(); i++ {
+			item := slice.Index(i).Interface()
+			model, ok := item.(schema.Tabler)
+			if !ok {
+				b.err = errors.New("every single data should implement gorm schema.Tabler")
+				return b
+			}
+			b.models = append(b.models, model)
+		}
+		return b
+	}
+
+	model, ok := data.(schema.Tabler)
+	if !ok {
+		b.err = errors.New("data should implement gorm schema.Tabler")
+		return b
+	}
+	b.models = append(b.models, model)
+	return b
+}
+
+// SQLStmts adds sql statements, each statement should be a valid sql statement.
+func (b *GMMBuilder) SQLStmts(stmts ...string) *GMMBuilder {
+	if b.err != nil {
+		return b
+	}
+	b.sqlStmts = append(b.sqlStmts, stmts...)
+	return b
+}
+
+// SQLFiles adds sql files, each file should be a valid sql file.
+func (b *GMMBuilder) SQLFiles(files ...string) *GMMBuilder {
+	if b.err != nil {
+		return b
+	}
+
+	for _, file := range files {
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			b.err = fmt.Errorf("sql file %s not exist", file)
+			return b
+		}
+	}
+
+	b.sqlFiles = append(b.sqlFiles, files...)
+	return b
+}
+
+func (b *GMMBuilder) initTables() {
+	if b.err != nil || len(b.tables) == 0 {
+		return
+	}
+
+	slog.Info("start to init tables, count = " + strconv.Itoa(len(b.tables)))
+	for _, table := range b.tables {
+		if err := b.gormDB.AutoMigrate(table); err != nil {
+			b.err = fmt.Errorf("failed to auto migrate(type=%T): %w", table, err)
+			return
+		}
+	}
+	slog.Info("init tables successfully, count = " + strconv.Itoa(len(b.tables)))
+}
+
+func (b *GMMBuilder) initWithModels() {
+	if b.err != nil || len(b.models) == 0 {
+		return
+	}
+
+	slog.Info("start to init data with models, count = " + strconv.Itoa(len(b.models)))
+	for _, model := range b.models {
+		if err := b.gormDB.AutoMigrate(model); err != nil {
+			b.err = fmt.Errorf("failed to auto migrate(type=%T): %w", model, err)
+			return
+		}
+		if err := b.gormDB.Create(model).Error; err != nil {
+			b.err = fmt.Errorf("failed to init data(type=%T): %w", model, err)
+			return
+		}
+	}
+	slog.Info("init data with models successfully, count = " + strconv.Itoa(len(b.models)))
+}
+
+func (b *GMMBuilder) initWithStmts() {
+	if b.err != nil || len(b.sqlStmts) == 0 {
+		return
+	}
+	slog.Info("start to init data with sql stmts, count = " + strconv.Itoa(len(b.sqlStmts)))
+	for _, stmt := range b.sqlStmts {
+		stmts, err := splitSQLStatements(stmt)
+		if err != nil {
+			b.err = err
+			return
+		}
+		if err = b.executeSQLStatements(stmts); err != nil {
+			b.err = err
+			return
+		}
+	}
+	slog.Info("init data with sql stmts successfully, count = " + strconv.Itoa(len(b.sqlStmts)))
+}
+
+func (b *GMMBuilder) initWithFiles() {
+	if b.err != nil || len(b.sqlFiles) == 0 {
+		return
+	}
+	slog.Info("start to init data with sql files, count = " + strconv.Itoa(len(b.sqlFiles)))
+	for _, file := range b.sqlFiles {
+		stmts, err := splitSQLFile(file)
+		if err != nil {
+			b.err = fmt.Errorf("failed to split sql file '%s': %w", file, err)
+			return
+		}
+		if err = b.executeSQLStatements(stmts); err != nil {
+			b.err = err
+			return
+		}
+	}
+	slog.Info("init data with sql files successfully, count = " + strconv.Itoa(len(b.sqlFiles)))
+}
+
+func (b *GMMBuilder) executeSQLStatements(stmts []string) error {
+	for _, stmt := range stmts {
+		_, err := b.sqlDB.Exec(stmt)
+		if err != nil {
+			return fmt.Errorf("failed to exec sql stmt '%s': %w", stmt, err)
+		}
+	}
+	return nil
+}
