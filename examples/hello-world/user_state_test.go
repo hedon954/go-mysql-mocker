@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/hedon954/gmm"
+	"github.com/hedon954/go-mysql-mocker/gmm"
 )
 
 func TestChangeUserStateToMatch(t *testing.T) {

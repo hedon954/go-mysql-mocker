@@ -7,12 +7,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/hedon954/gmm"
-	"github.com/hedon954/gmm/examples"
+	"github.com/hedon954/go-mysql-mocker/examples"
+	"github.com/hedon954/go-mysql-mocker/gmm"
 )
 
 func Test_InitDatWithModel(t *testing.T) {
-	data := []*examples.CertificationInfo{}
+	var data []*examples.CertificationInfo
 	for i := 0; i < 5; i++ {
 		data = append(data, &examples.CertificationInfo{ID: 10 + i, Username: "root", Password: uuid.NewString()})
 	}

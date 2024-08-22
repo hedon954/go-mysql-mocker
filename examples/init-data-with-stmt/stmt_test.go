@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/hedon954/gmm"
-	"github.com/hedon954/gmm/examples"
+	"github.com/hedon954/go-mysql-mocker/examples"
+	"github.com/hedon954/go-mysql-mocker/gmm"
 )
 
 func Test_InitDataWithStmt(t *testing.T) {

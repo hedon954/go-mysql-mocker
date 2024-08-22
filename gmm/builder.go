@@ -7,7 +7,6 @@ import (
 	"os"
 	"reflect"
 	"strconv"
-	"sync/atomic"
 
 	"github.com/dolthub/go-mysql-server/server"
 	"github.com/google/uuid"
@@ -15,20 +14,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
-
-// port is an atomic variable used to generate unique port numbers for tests.
-// By incrementing the port number atomically, we aim to minimize the risk of port conflicts
-// when running multiple tests concurrently.
-var port atomic.Int32
-
-func init() {
-	// Initialize the default port number.
-	// The initial value is set to 19527, and subsequent tests will use this value as a base,
-	// incrementing it atomically to ensure each test gets a unique port.
-	//
-	// Why 19527? Hhh, just for 9527~
-	port.Store(19527)
-}
 
 // GMMBuilder struct for building and managing the mock MySQL server
 type GMMBuilder struct {
@@ -49,7 +34,6 @@ type GMMBuilder struct {
 // if db name is not provided, gmm would generate a random db name.
 func Builder(db ...string) *GMMBuilder {
 	b := &GMMBuilder{
-		port:     int(port.Add(1)),
 		tables:   make([]schema.Tabler, 0),
 		models:   make([]schema.Tabler, 0),
 		sqlStmts: make([]string, 0),
@@ -75,13 +59,26 @@ func (b *GMMBuilder) Port(port int) *GMMBuilder {
 
 // Build initializes and starts the MySQL server, returns handles to SQL and Gorm DB
 func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err error) {
+	if b.err != nil {
+		return nil, nil, nil, b.err
+	}
+
+	// Get port
+	if b.port == 0 {
+		b.port, b.err = getFreePort()
+		if b.err != nil {
+			return nil, nil, nil, err
+		}
+	}
+
+	// Init mysql server
 	b.initServer()
 	if b.err != nil {
 		return nil, nil, nil, b.err
 	}
 
-	// Start server
-	slog.Info("start go mysql mocker server, listening at 0.0.0.0:" + strconv.Itoa(b.port))
+	// Start mysql server
+	slog.Info("start go mysql mocker server, listening at 127.0.0.1:" + strconv.Itoa(b.port))
 	go func() {
 		if err := b.server.Start(); err != nil {
 			panic(err)

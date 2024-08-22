@@ -3,6 +3,8 @@ package gmm
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //nolint:all
@@ -19,7 +21,7 @@ func Test_splitSQLFile(t *testing.T) {
 		{
 			name: "create and insert statements should success",
 			args: args{
-				filePath: "fixtures/demo.sql",
+				filePath: "../fixtures/demo.sql",
 			},
 			want: []string{
 				"CREATE TABLE IF NOT EXISTS `users` ( `id` INT NOT NULL AUTO_INCREMENT, `username` VARCHAR(50) NOT NULL, `email` VARCHAR(100) NOT NULL, `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
@@ -30,7 +32,7 @@ func Test_splitSQLFile(t *testing.T) {
 		{
 			name: "dump from sequel ace should success", // should output blob field as hex
 			args: args{
-				filePath: "fixtures/sequel_ace.sql",
+				filePath: "../fixtures/sequel_ace.sql",
 			},
 			want: []string{
 				"SET NAMES utf8mb4",
@@ -57,4 +59,16 @@ func Test_splitSQLFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_getFreePort(t *testing.T) {
+	t.Run("should get unused port", func(t *testing.T) {
+		ports := make(map[int]bool)
+		for i := 0; i < 100; i++ {
+			p, _ := getFreePort()
+			assert.NotEqual(t, 0, p)
+			assert.False(t, ports[p])
+			ports[p] = true
+		}
+	})
 }

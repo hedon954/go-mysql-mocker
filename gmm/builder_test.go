@@ -39,13 +39,13 @@ func Test_GMMBuilder_Port(t *testing.T) {
 
 func Test_GMMBuilder_SQLFiles(t *testing.T) {
 	t.Run("non existing file should return err", func(t *testing.T) {
-		_, _, _, err := Builder().SQLFiles("fixtures/not-exist.sql").Build()
+		_, _, _, err := Builder().SQLFiles("../fixtures/not-exist.sql").Build()
 		assert.NotNil(t, err)
-		assert.Equal(t, "sql file fixtures/not-exist.sql not exist", err.Error())
+		assert.Equal(t, "sql file ../fixtures/not-exist.sql not exist", err.Error())
 	})
 
 	t.Run("existing and valid file should ok", func(t *testing.T) {
-		_, _, _, err := Builder().SQLFiles("fixtures/sequel_ace.sql").Build()
+		_, _, _, err := Builder().SQLFiles("../fixtures/sequel_ace.sql").Build()
 		assert.Nil(t, err)
 	})
 }

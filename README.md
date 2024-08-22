@@ -1,12 +1,12 @@
-# gmm(go-mysql-mocker)
+# go-mysql-mocker(gmm)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/hedon954/gmm)](https://goreportcard.com/report/github.com/hedon954/gmm)
-[![codecov](https://codecov.io/gh/hedon954/gmm/graph/badge.svg?token=RtwHYWTrso)](https://codecov.io/gh/hedon954/gmm)
-[![CI](https://github.com/hedon954/gmm/workflows/build/badge.svg)](https://github.com/hedon954/gmm/actions)
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/hedon954/gmm?sort=semver)](https://github.com/hedon954/gmm/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hedon954/go-mysql-mocker)](https://goreportcard.com/report/github.com/hedon954/go-mysql-mocker)
+[![codecov](https://codecov.io/gh/hedon954/go-mysql-mocker/graph/badge.svg?token=RtwHYWTrso)](https://codecov.io/gh/hedon954/go-mysql-mocker)
+[![CI](https://github.com/hedon954/go-mysql-mocker/workflows/build/badge.svg)](https://github.com/hedon954/go-mysql-mocker/actions)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/hedon954/go-mysql-mocker?sort=semver)](https://github.com/hedon954/go-mysql-mocker/releases)
 
 
-`gmm(go-mysql-mocker)` was created to provide developers with a reliable and straightforward tool for mocking MySQL interactions in Go applications, particularly for automated testing environments. By simulating a MySQL server, `gmm` allows developers to conduct integration tests without the overhead of setting up a real database, thus speeding up test cycles and reducing external dependencies. This is especially useful in continuous integration (CI) environments where test reliability and speed are paramount.
+`go-mysql-mocker(gmm)` was created to provide developers with a reliable and straightforward tool for mocking MySQL interactions in Go applications, particularly for automated testing environments. By simulating a MySQL server, `go-mysql-mocker` allows developers to conduct integration tests without the overhead of setting up a real database, thus speeding up test cycles and reducing external dependencies. This is especially useful in continuous integration (CI) environments where test reliability and speed are paramount.
 
 ![architecture](./design/img/architecture.png)
 
@@ -19,7 +19,7 @@
 ## Installation
 
 ```bash
-go get -u github.com/hedon954/gmm
+go get -u github.com/hedon954/go-mysql-mocker
 ```
 
 ## Usage
@@ -97,4 +97,4 @@ func TestChangeUserStateToMatch(t *testing.T) {
 }
 ```
 
-For more detail, please see [example](./examples) folder.
+For more detail, please see [examples](./examples) folder.

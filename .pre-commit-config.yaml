@@ -23,7 +23,7 @@ repos:
       - id: go-unit-tests
         name: go-unit-tests
         description: run go tests with race detector
-        entry: bash -c 'go test -race ./...'
+        entry: go test -v -race ./...
         language: golang
         files: \.*$
         pass_filenames: false
