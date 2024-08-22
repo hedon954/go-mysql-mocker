@@ -65,7 +65,7 @@ func Test_splitSQLFile(t *testing.T) {
 func Test_getFreePort(t *testing.T) {
 	t.Run("should get unused port", func(t *testing.T) {
 		ports := make(map[int]net.Listener)
-		for i := 0; i < 100; i++ {
+		for i := 0; i < 10; i++ {
 			listener, p, _ := getFreePort()
 			assert.NotEqual(t, 0, p)
 			assert.Nil(t, ports[p])

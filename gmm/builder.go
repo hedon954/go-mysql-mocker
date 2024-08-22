@@ -51,9 +51,6 @@ func Builder(db ...string) *GMMBuilder {
 // Port sets the port for the MySQL server,
 // if not set, gmm would generate a port start from 19527
 func (b *GMMBuilder) Port(port int) *GMMBuilder {
-	if b.err != nil {
-		return b
-	}
 	b.port = port
 	return b
 }
@@ -129,19 +126,12 @@ func (b *GMMBuilder) initServer() *GMMBuilder {
 
 // CreateTable adds a table to be created upon initialization
 func (b *GMMBuilder) CreateTable(table schema.Tabler) *GMMBuilder {
-	if b.err != nil {
-		return b
-	}
 	b.tables = append(b.tables, table)
 	return b
 }
 
 // InitData adds initialization data to the mock database
 func (b *GMMBuilder) InitData(data interface{}) *GMMBuilder {
-	if b.err != nil {
-		return b
-	}
-
 	if reflect.TypeOf(data).Kind() == reflect.Slice {
 		slice := reflect.ValueOf(data)
 		for i := 0; i < slice.Len(); i++ {
@@ -167,19 +157,12 @@ func (b *GMMBuilder) InitData(data interface{}) *GMMBuilder {
 
 // SQLStmts adds SQL statements to be executed upon initialization
 func (b *GMMBuilder) SQLStmts(stmts ...string) *GMMBuilder {
-	if b.err != nil {
-		return b
-	}
 	b.sqlStmts = append(b.sqlStmts, stmts...)
 	return b
 }
 
 // SQLFiles adds SQL files whose contents are to be executed upon initialization
 func (b *GMMBuilder) SQLFiles(files ...string) *GMMBuilder {
-	if b.err != nil {
-		return b
-	}
-
 	for _, file := range files {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
 			b.err = fmt.Errorf("sql file %s not exist", file)

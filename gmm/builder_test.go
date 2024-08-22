@@ -120,6 +120,12 @@ func Test_GMMBuilder_InitData(t *testing.T) {
 		_, _, _, err := Builder().InitData([]interface{}{&CertificationInfo{}, &UserState{}}).Build()
 		assert.Nil(t, err)
 	})
+
+	t.Run("slice of different types but some do not implement schema.Tabler should return err", func(t *testing.T) {
+		_, _, _, err := Builder().InitData([]interface{}{&CertificationInfo{}, 1}).Build()
+		assert.NotNil(t, err)
+		assert.Equal(t, "every single data should implement gorm schema.Tabler", err.Error())
+	})
 }
 
 func TestGMMBuilder_CreateTable(t *testing.T) {
