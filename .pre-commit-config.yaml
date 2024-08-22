@@ -7,12 +7,16 @@ repos:
         files: \.go$
       - id: check-yaml # fix yaml format file.
       - id: check-added-large-files # let you know which file has large file size.
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-mod-tidy # run go mod tidy -v.
   - repo: local
     hooks:
       - id: golangci-lint
         name: golangci-lint
         description: run golangci-lint
-        entry: golangci-lint run -v
+        entry: golangci-lint run -v ./...
         language: golang
         files: \.*$
         pass_filenames: false

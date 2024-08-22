@@ -31,11 +31,19 @@ linters-settings:
     line-length: 140
   misspell:
     locale: US
+  mnd:
+    checks: # "argument", "case", "condition", "operation", "return", "assign"
+      - case
+      - return
+      - assign
+      - condition
+      - operation
   stylecheck:
     checks:
       - ST1000
       - ST1001
       - ST1002
+      # 不要启用 ST1003
       - ST1004
       - ST1005
       - ST1006
@@ -65,6 +73,7 @@ linters:
     - gocyclo
     - gofmt
     - goimports
+    - mnd
     - goprintffuncname
     - gosec
     - gosimple
@@ -82,3 +91,23 @@ linters:
     - unparam
     - unused
     - whitespace
+
+  # don't enable:
+  # - gochecknoglobals
+  # - gocognit
+  # - godox
+  # - maligned
+  # - prealloc
+
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - funlen
+  exclude-dirs:
+    - vendor
+  new: true
+  new-from-rev: "HEAD~1"
+  whole-files: false

@@ -1,6 +1,6 @@
 module github.com/hedon954/gmm
 
-go 1.20
+go 1.22
 
 require (
 	github.com/dolthub/go-mysql-server v0.18.1
