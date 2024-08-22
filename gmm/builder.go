@@ -64,7 +64,14 @@ func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err er
 		return nil, nil, nil, b.err
 	}
 
-	// Get port
+	// If not specify port, get an unused one form local machine.
+	//
+	// NOTE: The `getFreePort` method indeed has the limitation
+	// that it cannot guarantee the port will remain available.
+	// While it can find a currently unused port,
+	// there is a possibility that the port might be occupied
+	// by another process between the time the port number is
+	// retrieved and the moment it is actually used.
 	if b.port == 0 {
 		var listener net.Listener
 		listener, b.port, b.err = getFreePort()
