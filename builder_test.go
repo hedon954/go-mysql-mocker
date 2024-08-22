@@ -37,7 +37,7 @@ func Test_GMMBuilder_Port(t *testing.T) {
 	})
 }
 
-func Test_GMMBuilder_File(t *testing.T) {
+func Test_GMMBuilder_SQLFiles(t *testing.T) {
 	t.Run("non existing file should return err", func(t *testing.T) {
 		_, _, _, err := Builder().SQLFiles("fixtures/not-exist.sql").Build()
 		assert.NotNil(t, err)
@@ -51,7 +51,7 @@ func Test_GMMBuilder_File(t *testing.T) {
 }
 
 //nolint:lll
-func Test_GMMBuilder_Stmt(t *testing.T) {
+func Test_GMMBuilder_SQLStmts(t *testing.T) {
 	t.Run("invalid sql statement should return err", func(t *testing.T) {
 		_, _, _, err := Builder().SQLStmts("invalid sql statement").Build()
 		assert.NotNil(t, err)
@@ -82,7 +82,7 @@ INSERT INTO users (username, email) VALUES
 	})
 }
 
-func TestGMMBuilder_Data(t *testing.T) {
+func Test_GMMBuilder_InitData(t *testing.T) {
 	t.Run("invalid data type should return err", func(t *testing.T) {
 		_, _, _, err := Builder().InitData(1).Build()
 		assert.NotNil(t, err)
@@ -118,6 +118,18 @@ func TestGMMBuilder_Data(t *testing.T) {
 
 	t.Run("slice of different types that implemented schema.Tabler should ok", func(t *testing.T) {
 		_, _, _, err := Builder().InitData([]interface{}{&CertificationInfo{}, &UserState{}}).Build()
+		assert.Nil(t, err)
+	})
+}
+
+func TestGMMBuilder_CreateTable(t *testing.T) {
+	t.Run("valid type should ok", func(t *testing.T) {
+		_, _, _, err := Builder().CreateTable(CertificationInfo{}).Build()
+		assert.Nil(t, err)
+	})
+
+	t.Run("create multi times should ok", func(t *testing.T) {
+		_, _, _, err := Builder().CreateTable(CertificationInfo{}).CreateTable(CertificationInfo{}).Build()
 		assert.Nil(t, err)
 	})
 }

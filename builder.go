@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"reflect"
 	"strconv"
@@ -12,16 +11,26 @@ import (
 
 	"github.com/dolthub/go-mysql-server/server"
 	"github.com/google/uuid"
+	"golang.org/x/exp/slog"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
 
+// port is an atomic variable used to generate unique port numbers for tests.
+// By incrementing the port number atomically, we aim to minimize the risk of port conflicts
+// when running multiple tests concurrently.
 var port atomic.Int32
 
 func init() {
+	// Initialize the default port number.
+	// The initial value is set to 19527, and subsequent tests will use this value as a base,
+	// incrementing it atomically to ensure each test gets a unique port.
+	//
+	// Why 19527? Hhh, just for 9527~
 	port.Store(19527)
 }
 
+// GMMBuilder struct for building and managing the mock MySQL server
 type GMMBuilder struct {
 	dbName string
 	port   int
@@ -36,6 +45,8 @@ type GMMBuilder struct {
 	sqlFiles []string
 }
 
+// Builder initializes a new GMMBuilder instance with db name,
+// if db name is not provided, gmm would generate a random db name.
 func Builder(db ...string) *GMMBuilder {
 	b := &GMMBuilder{
 		port:     int(port.Add(1)),
@@ -52,6 +63,8 @@ func Builder(db ...string) *GMMBuilder {
 	return b
 }
 
+// Port sets the port for the MySQL server,
+// if not set, gmm would generate a port start from 19527
 func (b *GMMBuilder) Port(port int) *GMMBuilder {
 	if b.err != nil {
 		return b
@@ -60,13 +73,14 @@ func (b *GMMBuilder) Port(port int) *GMMBuilder {
 	return b
 }
 
+// Build initializes and starts the MySQL server, returns handles to SQL and Gorm DB
 func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err error) {
 	b.initServer()
 	if b.err != nil {
 		return nil, nil, nil, b.err
 	}
 
-	// start server
+	// Start server
 	slog.Info("start go mysql mocker server, listening at 0.0.0.0:" + strconv.Itoa(b.port))
 	go func() {
 		if err := b.server.Start(); err != nil {
@@ -78,14 +92,14 @@ func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err er
 		_ = b.server.Close()
 	}
 
-	// create client and connect to server
+	// Create client and connect to server
 	b.sqlDB, b.gormDB, err = createMySQLClient(b.port, b.dbName)
 	if err != nil {
 		b.err = fmt.Errorf("failed to create sql client: %w", err)
 		return nil, nil, nil, b.err
 	}
 
-	// prepare init data
+	// Initialize tables and data
 	b.initTables()
 	b.initWithModels()
 	b.initWithStmts()
@@ -97,6 +111,7 @@ func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err er
 	return b.sqlDB, b.gormDB, shutdown, nil
 }
 
+// initServer initializes the mock MySQL server
 func (b *GMMBuilder) initServer() *GMMBuilder {
 	if b.err != nil {
 		return b
@@ -105,6 +120,7 @@ func (b *GMMBuilder) initServer() *GMMBuilder {
 	return b
 }
 
+// CreateTable adds a table to be created upon initialization
 func (b *GMMBuilder) CreateTable(table schema.Tabler) *GMMBuilder {
 	if b.err != nil {
 		return b
@@ -113,8 +129,7 @@ func (b *GMMBuilder) CreateTable(table schema.Tabler) *GMMBuilder {
 	return b
 }
 
-// InitData adds init data, if data is a struct/pointer, should implement schema.Tabler.
-// if data is a slice, each item should implement schema.Tabler, otherwise will return error.
+// InitData adds initialization data to the mock database
 func (b *GMMBuilder) InitData(data interface{}) *GMMBuilder {
 	if b.err != nil {
 		return b
@@ -143,7 +158,7 @@ func (b *GMMBuilder) InitData(data interface{}) *GMMBuilder {
 	return b
 }
 
-// SQLStmts adds sql statements, each statement should be a valid sql statement.
+// SQLStmts adds SQL statements to be executed upon initialization
 func (b *GMMBuilder) SQLStmts(stmts ...string) *GMMBuilder {
 	if b.err != nil {
 		return b
@@ -152,7 +167,7 @@ func (b *GMMBuilder) SQLStmts(stmts ...string) *GMMBuilder {
 	return b
 }
 
-// SQLFiles adds sql files, each file should be a valid sql file.
+// SQLFiles adds SQL files whose contents are to be executed upon initialization
 func (b *GMMBuilder) SQLFiles(files ...string) *GMMBuilder {
 	if b.err != nil {
 		return b

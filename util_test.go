@@ -7,7 +7,6 @@ import (
 
 //nolint:all
 func Test_splitSQLFile(t *testing.T) {
-
 	type args struct {
 		filePath string
 	}
