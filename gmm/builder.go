@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"reflect"
 	"strconv"
@@ -65,10 +66,12 @@ func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err er
 
 	// Get port
 	if b.port == 0 {
-		b.port, b.err = getFreePort()
+		var listener net.Listener
+		listener, b.port, b.err = getFreePort()
 		if b.err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, b.err
 		}
+		_ = listener.Close()
 	}
 
 	// Init mysql server

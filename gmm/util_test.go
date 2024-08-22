@@ -1,6 +1,7 @@
 package gmm
 
 import (
+	"net"
 	"reflect"
 	"testing"
 
@@ -63,12 +64,15 @@ func Test_splitSQLFile(t *testing.T) {
 
 func Test_getFreePort(t *testing.T) {
 	t.Run("should get unused port", func(t *testing.T) {
-		ports := make(map[int]bool)
+		ports := make(map[int]net.Listener)
 		for i := 0; i < 100; i++ {
-			p, _ := getFreePort()
+			listener, p, _ := getFreePort()
 			assert.NotEqual(t, 0, p)
-			assert.False(t, ports[p])
-			ports[p] = true
+			assert.Nil(t, ports[p])
+			ports[p] = listener
+		}
+		for _, listener := range ports {
+			assert.Nil(t, listener.Close())
 		}
 	})
 }

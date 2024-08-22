@@ -77,11 +77,11 @@ func cleanString(input string) string {
 }
 
 // getFreePort returns a free port on the local machine
-func getFreePort() (int, error) {
+func getFreePort() (net.Listener, int, error) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
 	port := listener.Addr().(*net.TCPAddr).Port
-	return port, listener.Close()
+	return listener, port, nil
 }
