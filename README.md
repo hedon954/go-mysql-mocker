@@ -97,4 +97,4 @@ func TestChangeUserStateToMatch(t *testing.T) {
 }
 ```
 
-For more detail, please can see [example](./examples) folder.
+For more detail, please see [example](./examples) folder.
