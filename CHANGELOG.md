@@ -5,16 +5,8 @@
 
 Finish go-mysql-mocker basic features and support for go1.20 projects
 
-### ⚙️ Miscellaneous Chores
-
-- rollback to go1.22 - ([c710e60](https://github.com/hedon-go-road/template-web/commit/c710e605446dec40e446a646448b81606f70cd88)) - hedon954
-- ci use go1.22 - ([0c7230d](https://github.com/hedon-go-road/template-web/commit/0c7230d1a7ca57c8ad62f70d6061c928ff5da86c)) - hedon954
-- delete makefile - ([ede4ce1](https://github.com/hedon-go-road/template-web/commit/ede4ce1b9497348c9fdfb4c735506b3329cc3662)) - hedon954
-
 ### ⛰️ Features
 
-- **(ci)** run on go1.20, go1.21, go1.22 and go1.23 - ([3cd8c25](https://github.com/hedon-go-road/template-web/commit/3cd8c25a39512ea4a37133c0e19727fb0f73c3e9)) - wangjiahan
-- **(ci)** run on go1.20 - ([e4bd130](https://github.com/hedon-go-road/template-web/commit/e4bd130c030ecf071501ff23dce2ec84a5635031)) - hedon954
 - finish gmm - ([ea8f4a0](https://github.com/hedon-go-road/template-web/commit/ea8f4a0fe2cd0320ea3cc78a637338de72b8c4e9)) - wangjiahan
 - remove some useless error check and improve unit test for `InitData` - ([280eb23](https://github.com/hedon-go-road/template-web/commit/280eb2396addc2d13fd7acb4164298e507788e08)) - hedon954
 
@@ -24,7 +16,6 @@ Finish go-mysql-mocker basic features and support for go1.20 projects
 
 ### 📚 Documentation
 
-- **(changelog)** delete useless records - ([2e8f3e9](https://github.com/hedon-go-road/template-web/commit/2e8f3e9e3f6ec846bfbce1b701c6f828feac3d7d)) - wangjiahan
 - **(gmm)** add some comments for get free port - ([572fb4c](https://github.com/hedon-go-road/template-web/commit/572fb4c5b728c7057ec07b8a11ae2b7e584a5153)) - hedon954
 - **(readme)** fix wrong - ([ac3e0fb](https://github.com/hedon-go-road/template-web/commit/ac3e0fb95ff9dc2d348b29e28223ded4f04f42ae)) - hedon954
 - **(readme)** add requirements note - ([abfe473](https://github.com/hedon-go-road/template-web/commit/abfe4738e2f8219cd055dc2ea9f9022914ca0d91)) - wangjiahan
