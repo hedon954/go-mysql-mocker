@@ -5,12 +5,6 @@
 
 Finish go-mysql-mocker basic features and support for go1.20 projects.
 
-### ⚙️ Miscellaneous Chores
-
-- rollback to go1.22 - ([c710e60](https://github.com/hedon-go-road/template-web/commit/c710e605446dec40e446a646448b81606f70cd88)) - hedon954
-- ci use go1.22 - ([0c7230d](https://github.com/hedon-go-road/template-web/commit/0c7230d1a7ca57c8ad62f70d6061c928ff5da86c)) - hedon954
-- delete makefile - ([ede4ce1](https://github.com/hedon-go-road/template-web/commit/ede4ce1b9497348c9fdfb4c735506b3329cc3662)) - hedon954
-
 ### ⛰️ Features
 
 - finish gmm - ([ea8f4a0](https://github.com/hedon-go-road/template-web/commit/ea8f4a0fe2cd0320ea3cc78a637338de72b8c4e9)) - wangjiahan
