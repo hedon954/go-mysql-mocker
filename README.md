@@ -16,6 +16,10 @@
 - Uses in-memory storage to speed up tests.
 - Automatic table creation and data seeding using GORM models or SQL statements.
 
+## Requirements
+
+- Go 1.20 (or later versions)
+
 ## Installation
 
 ```bash
