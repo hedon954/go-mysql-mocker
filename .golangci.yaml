@@ -31,13 +31,6 @@ linters-settings:
     line-length: 140
   misspell:
     locale: US
-  mnd:
-    checks: # "argument", "case", "condition", "operation", "return", "assign"
-      - case
-      - return
-      - assign
-      - condition
-      - operation
   stylecheck:
     checks:
       - ST1000
@@ -73,7 +66,6 @@ linters:
     - gocyclo
     - gofmt
     - goimports
-    - mnd
     - goprintffuncname
     - gosec
     - gosimple
@@ -104,7 +96,6 @@ issues:
   exclude-rules:
     - path: _test\.go
       linters:
-        - gomnd
         - funlen
   exclude-dirs:
     - vendor
