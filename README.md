@@ -24,7 +24,7 @@
 ## Installation
 
 ```bash
-go get -u github.com/hedon954/go-mysql-mocker@v0.0.1
+go get -u github.com/hedon954/go-mysql-mocker
 ```
 
 ## Usage
