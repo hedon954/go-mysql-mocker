@@ -7,7 +7,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/hedon954/go-mysql-mocker.svg)](https://pkg.go.dev/github.com/hedon954/go-mysql-mocker@v0.0.1)
 
 
-`go-mysql-mocker(gmm)` was created to provide developers with a reliable and straightforward tool for mocking MySQL interactions in Go applications, particularly for automated testing environments. By simulating a MySQL server, `go-mysql-mocker` allows developers to conduct integration tests without the overhead of setting up a real database, thus speeding up test cycles and reducing external dependencies. This is especially useful in continuous integration (CI) environments where test reliability and speed are paramount.
+`go-mysql-mocker(gmm)` was created to provide developers with a reliable and straightforward tool for mocking MySQL interactions in Go applications, particularly for automated testing environments. By simulating a MySQL server, `go-mysql-mocker` allows developers to conduct unit tests without the overhead of setting up a real database, thus speeding up test cycles and reducing external dependencies. This is especially useful in continuous integration (CI) environments where test reliability and speed are paramount.
 
 ![architecture](./design/img/architecture.png)
 
