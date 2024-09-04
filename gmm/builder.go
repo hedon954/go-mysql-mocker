@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"reflect"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/dolthub/go-mysql-server/server"
 	"github.com/google/uuid"
-	"golang.org/x/exp/slog"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
@@ -85,7 +85,7 @@ func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err er
 	}
 
 	// Start mysql server
-	slog.Info("start go mysql mocker server, listening at 127.0.0.1:" + strconv.Itoa(b.port))
+	log.Print("start go mysql mocker server, listening at 127.0.0.1:" + strconv.Itoa(b.port))
 	go func() {
 		if err := b.server.Start(); err != nil {
 			panic(err)
@@ -179,14 +179,14 @@ func (b *GMMBuilder) initTables() {
 		return
 	}
 
-	slog.Info("start to init tables, count = " + strconv.Itoa(len(b.tables)))
+	log.Print("start to init tables, count = " + strconv.Itoa(len(b.tables)))
 	for _, table := range b.tables {
 		if err := b.gormDB.AutoMigrate(table); err != nil {
 			b.err = fmt.Errorf("failed to auto migrate(type=%T): %w", table, err)
 			return
 		}
 	}
-	slog.Info("init tables successfully, count = " + strconv.Itoa(len(b.tables)))
+	log.Print("init tables successfully, count = " + strconv.Itoa(len(b.tables)))
 }
 
 func (b *GMMBuilder) initWithModels() {
@@ -194,7 +194,7 @@ func (b *GMMBuilder) initWithModels() {
 		return
 	}
 
-	slog.Info("start to init data with models, count = " + strconv.Itoa(len(b.models)))
+	log.Print("start to init data with models, count = " + strconv.Itoa(len(b.models)))
 	for _, model := range b.models {
 		if err := b.gormDB.AutoMigrate(model); err != nil {
 			b.err = fmt.Errorf("failed to auto migrate(type=%T): %w", model, err)
@@ -205,14 +205,14 @@ func (b *GMMBuilder) initWithModels() {
 			return
 		}
 	}
-	slog.Info("init data with models successfully, count = " + strconv.Itoa(len(b.models)))
+	log.Print("init data with models successfully, count = " + strconv.Itoa(len(b.models)))
 }
 
 func (b *GMMBuilder) initWithStmts() {
 	if b.err != nil || len(b.sqlStmts) == 0 {
 		return
 	}
-	slog.Info("start to init data with sql stmts, count = " + strconv.Itoa(len(b.sqlStmts)))
+	log.Print("start to init data with sql stmts, count = " + strconv.Itoa(len(b.sqlStmts)))
 	for _, stmt := range b.sqlStmts {
 		stmts, err := splitSQLStatements(stmt)
 		if err != nil {
@@ -224,14 +224,14 @@ func (b *GMMBuilder) initWithStmts() {
 			return
 		}
 	}
-	slog.Info("init data with sql stmts successfully, count = " + strconv.Itoa(len(b.sqlStmts)))
+	log.Print("init data with sql stmts successfully, count = " + strconv.Itoa(len(b.sqlStmts)))
 }
 
 func (b *GMMBuilder) initWithFiles() {
 	if b.err != nil || len(b.sqlFiles) == 0 {
 		return
 	}
-	slog.Info("start to init data with sql files, count = " + strconv.Itoa(len(b.sqlFiles)))
+	log.Print("start to init data with sql files, count = " + strconv.Itoa(len(b.sqlFiles)))
 	for _, file := range b.sqlFiles {
 		stmts, err := splitSQLFile(file)
 		if err != nil {
@@ -243,7 +243,7 @@ func (b *GMMBuilder) initWithFiles() {
 			return
 		}
 	}
-	slog.Info("init data with sql files successfully, count = " + strconv.Itoa(len(b.sqlFiles)))
+	log.Print("init data with sql files successfully, count = " + strconv.Itoa(len(b.sqlFiles)))
 }
 
 func (b *GMMBuilder) executeSQLStatements(stmts []string) error {

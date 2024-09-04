@@ -11,15 +11,14 @@ repos:
     rev: v0.5.1
     hooks:
       - id: go-mod-tidy # run go mod tidy -v.
-  - repo: local
+  - repo: https://github.com/golangci/golangci-lint # golangci-lint hook repo
+    rev: v1.54.2 # golangci-lint hook repo revision
     hooks:
       - id: golangci-lint
-        name: golangci-lint
-        description: run golangci-lint
-        entry: golangci-lint run -v ./...
-        language: golang
-        files: \.*$
-        pass_filenames: false
+        stages: [ pre-commit ]
+        language_version: 1.20.14
+  - repo: local
+    hooks:
       - id: go-unit-tests
         name: go-unit-tests
         description: run go tests with race detector
