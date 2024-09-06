@@ -11,6 +11,11 @@
 
 ![architecture](./design/img/architecture.png)
 
+## Dependencies
+
+- [go-mysql-server](https://github.com/dolthub/go-mysql-server): used for MySQL memory server
+- [gorm](https://github.com/go-gorm/gorm): used for creating table and initializing data
+
 ## Features
 
 - Easy setup and integration with Go projects.
