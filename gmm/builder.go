@@ -9,6 +9,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"sync/atomic"
 
 	"github.com/dolthub/go-mysql-server/server"
 	"github.com/google/uuid"
@@ -18,12 +19,13 @@ import (
 
 // GMMBuilder struct for building and managing the mock MySQL server
 type GMMBuilder struct {
-	dbName string
-	port   int
-	server *server.Server
-	sqlDB  *sql.DB
-	gormDB *gorm.DB
-	err    error
+	dbName  string
+	port    int
+	server  *server.Server
+	sqlDB   *sql.DB
+	gormDB  *gorm.DB
+	err     error
+	started atomic.Bool
 
 	tables   []schema.Tabler
 	models   []schema.Tabler
@@ -39,6 +41,7 @@ func Builder(db ...string) *GMMBuilder {
 		models:   make([]schema.Tabler, 0),
 		sqlStmts: make([]string, 0),
 		sqlFiles: make([]string, 0),
+		started:  atomic.Bool{},
 	}
 	dbName := "gmm-test-db-" + uuid.NewString()[:6]
 	if len(db) > 0 {
@@ -59,6 +62,10 @@ func (b *GMMBuilder) Port(port int) *GMMBuilder {
 func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err error) {
 	if b.err != nil {
 		return nil, nil, nil, b.err
+	}
+
+	if !b.started.CompareAndSwap(false, true) {
+		return nil, nil, nil, errors.New("gmm server already started")
 	}
 
 	// If not specify port, get an unused one form local machine.
