@@ -19,13 +19,14 @@ import (
 
 // GMMBuilder struct for building and managing the mock MySQL server
 type GMMBuilder struct {
-	dbName  string
-	port    int
-	server  *server.Server
-	sqlDB   *sql.DB
-	gormDB  *gorm.DB
-	err     error
-	started atomic.Bool
+	dbName    string
+	port      int
+	server    *server.Server
+	sqlDB     *sql.DB
+	gormDB    *gorm.DB
+	err       error
+	started   atomic.Bool
+	logSilent bool
 
 	tables   []schema.Tabler
 	models   []schema.Tabler
@@ -37,11 +38,12 @@ type GMMBuilder struct {
 // if db name is not provided, gmm would generate a random db name.
 func Builder(db ...string) *GMMBuilder {
 	b := &GMMBuilder{
-		tables:   make([]schema.Tabler, 0),
-		models:   make([]schema.Tabler, 0),
-		sqlStmts: make([]string, 0),
-		sqlFiles: make([]string, 0),
-		started:  atomic.Bool{},
+		tables:    make([]schema.Tabler, 0),
+		models:    make([]schema.Tabler, 0),
+		sqlStmts:  make([]string, 0),
+		sqlFiles:  make([]string, 0),
+		started:   atomic.Bool{},
+		logSilent: true,
 	}
 	dbName := "gmm-test-db-" + uuid.NewString()[:6]
 	if len(db) > 0 {
@@ -55,6 +57,12 @@ func Builder(db ...string) *GMMBuilder {
 // if not set, gmm would generate a port start from 19527
 func (b *GMMBuilder) Port(port int) *GMMBuilder {
 	b.port = port
+	return b
+}
+
+// LogSilent sets the log mode for the MySQL server, default is silent mode.
+func (b *GMMBuilder) LogSilent(logSilent bool) *GMMBuilder {
+	b.logSilent = logSilent
 	return b
 }
 
@@ -104,7 +112,7 @@ func (b *GMMBuilder) Build() (sDB *sql.DB, gDB *gorm.DB, shutdown func(), err er
 	}
 
 	// Create client and connect to server
-	b.sqlDB, b.gormDB, err = createMySQLClient(b.port, b.dbName)
+	b.sqlDB, b.gormDB, err = createMySQLClient(b.port, b.dbName, b.logSilent)
 	if err != nil {
 		b.err = fmt.Errorf("failed to create sql client: %w", err)
 		return nil, nil, nil, b.err
