@@ -12,11 +12,11 @@ repos:
     hooks:
       - id: go-mod-tidy # run go mod tidy -v.
   - repo: https://github.com/golangci/golangci-lint # golangci-lint hook repo
-    rev: v1.54.2 # golangci-lint hook repo revision
+    rev: v1.64.6 # golangci-lint hook repo revision
     hooks:
       - id: golangci-lint
         stages: [ pre-commit ]
-        language_version: 1.20.14
+        language_version: 1.24.0
   - repo: local
     hooks:
       - id: go-unit-tests

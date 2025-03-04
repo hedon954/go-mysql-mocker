@@ -2,4 +2,12 @@
 configer = "configer"
 
 [files]
-extend-exclude = ["CHANGELOG.md", "notebooks/*", ".gitignore", "assets/*", "design/*"]
+extend-exclude = [
+    "CHANGELOG.md",
+    "notebooks/*",
+    ".gitignore",
+    "assets/*",
+    "design/*",
+    "go.mod",
+    "go.sum",
+]
