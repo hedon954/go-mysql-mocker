@@ -60,6 +60,15 @@ func (b *GMMBuilder) Port(port int) *GMMBuilder {
 	return b
 }
 
+// GetPort returns the port of the MySQL server,
+// if not set, gmm would return the port of the server.
+func (b *GMMBuilder) GetPort() int {
+	if b.port == 0 {
+		return b.server.Listener.Addr().(*net.TCPAddr).Port
+	}
+	return b.port
+}
+
 // LogSilent sets the log mode for the MySQL server, default is silent mode.
 func (b *GMMBuilder) LogSilent(logSilent bool) *GMMBuilder {
 	b.logSilent = logSilent
