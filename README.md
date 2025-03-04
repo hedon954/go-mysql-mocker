@@ -6,7 +6,6 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/hedon954/go-mysql-mocker?sort=semver)](https://github.com/hedon954/go-mysql-mocker/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/hedon954/go-mysql-mocker.svg)](https://pkg.go.dev/github.com/hedon954/go-mysql-mocker)
 
-
 `go-mysql-mocker(gmm)` was created to provide developers with a reliable and straightforward tool for mocking MySQL interactions in Go applications, particularly for automated testing environments. By simulating a MySQL server, `go-mysql-mocker` allows developers to conduct unit tests without the overhead of setting up a real database, thus speeding up test cycles and reducing external dependencies. This is especially useful in continuous integration (CI) environments where test reliability and speed are paramount.
 
 ![architecture](./design/img/architecture.png)
@@ -24,7 +23,8 @@
 
 ## Requirements
 
-- Go 1.20 (or later versions)
+- Go 1.20 (<=v1.0.6)
+- Go 1.24 (>=v1.0.7)
 
 ## Installation
 
@@ -41,10 +41,10 @@ go get -u github.com/hedon954/go-mysql-mocker
 - `SQLFiles(files)`: Reads SQL statements from specified files and executes them to generate test data. This method is useful for initializing the database with a larger set of pre-defined SQL operations.
 - `Build()`: Initializes and starts the MySQL server with all specified configurations and initializes the data. This method must be called to execute the configurations set up by the preceding methods.
 
-
 ## Quick Start
 
 ### prepare a data model and implement `TableName()` interface
+
 ```go
 type UserState struct {
 	UID   string `gorm:"primaryKey;column:uid"`
@@ -57,6 +57,7 @@ func (u UserState) TableName() string {
 ```
 
 ### write a business logic
+
 ```go
 func ChangeUserStateToMatch(db *sql.DB, uid string) (int64, error) {
 	res, err := db.Exec("UPDATE user_state SET state = 'match' WHERE uid = ?", uid)
@@ -68,6 +69,7 @@ func ChangeUserStateToMatch(db *sql.DB, uid string) (int64, error) {
 ```
 
 ### use `gmm` to test it
+
 ```go
 func TestChangeUserStateToMatch(t *testing.T) {
 	t.Run("no data should have no affect row", func(t *testing.T) {
